@@ -202,14 +202,9 @@ class NotionClient:
                 # フィルター条件を追加
                 if filter_dict:
                     query_params["filter"] = filter_dict
-                elif not archived:
-                    # デフォルトでアーカイブされていないページのみ取得
-                    query_params["filter"] = {
-                        "property": "archived",
-                        "checkbox": {
-                            "equals": False
-                        }
-                    }
+                # Note: archivedはページレベルのプロパティのため、
+                # データベースクエリではフィルターできません。
+                # 取得後にPythonコードでフィルタリングします。
                 
                 # ソート条件を追加
                 if sorts:
@@ -231,6 +226,9 @@ class NotionClient:
                 # ページを変換
                 for page_data in response.get("results", []):
                     page = self._convert_to_notion_page(page_data)
+                    # archivedフィルタリング（取得後にPythonで処理）
+                    if not archived and page.archived:
+                        continue
                     pages.append(page)
                 
                 has_more = response.get("has_more", False)
