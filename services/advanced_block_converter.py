@@ -9,6 +9,7 @@ from typing import Dict, List, Any, Optional
 from models.notion import NotionBlock
 from models.config import ConversionConfig
 from services.conversion_limitations import ConversionLimitationTracker, ConversionWarningSystem
+from services.link_processor import NotionLinkProcessor
 
 
 class AdvancedBlockConverter:
@@ -25,6 +26,7 @@ class AdvancedBlockConverter:
         self.logger = logging.getLogger(__name__)
         self.limitation_tracker = ConversionLimitationTracker(conversion_config)
         self.warning_system = ConversionWarningSystem(self.limitation_tracker)
+        self.link_processor = NotionLinkProcessor(conversion_config)
     
     def convert_blocks_to_markdown(self, blocks: List[NotionBlock]) -> str:
         """
@@ -597,9 +599,12 @@ class AdvancedBlockConverter:
         if not rich_text_data:
             return ""
         
+        # リンク処理を適用
+        processed_rich_text = self.link_processor.process_rich_text_links(rich_text_data)
+        
         result_parts = []
         
-        for text_item in rich_text_data:
+        for text_item in processed_rich_text:
             plain_text = text_item.get("plain_text", "")
             annotations = text_item.get("annotations", {})
             href = text_item.get("href")
@@ -619,9 +624,10 @@ class AdvancedBlockConverter:
             if annotations.get("code"):
                 formatted_text = f"`{formatted_text}`"
             
-            # リンクの処理
+            # リンクの処理（高度なリンク処理を使用）
             if href:
-                formatted_text = f"[{formatted_text}]({href})"
+                link_ref = self.link_processor.process_link(href, "rich_text")
+                formatted_text = self.link_processor.convert_link_to_markdown(link_ref, formatted_text)
             
             result_parts.append(formatted_text)
         
