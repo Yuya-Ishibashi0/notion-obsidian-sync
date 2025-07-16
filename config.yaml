@@ -1,0 +1,53 @@
+# Notion-Obsidian同期設定テンプレート
+# このファイルをコピーして、あなたの設定に合わせてカスタマイズしてください
+
+notion:
+  # あなたのNotion統合APIトークン
+  # .envファイルから環境変数として読み込み
+  api_token: ${NOTION_API_TOKEN}
+  
+  # 同期元のNotionデータベースのID
+  # .envファイルから環境変数として読み込み
+  database_id: ${NOTION_DATABASE_ID}
+
+obsidian:
+  # Obsidianボルトディレクトリへのパス
+  # .envファイルから環境変数として読み込み
+  vault_path: ${OBSIDIAN_VAULT_PATH}
+  
+  # オプション: ボルト内の同期先サブフォルダ
+  # .envファイルから環境変数として読み込み（空の場合はデフォルト値）
+  subfolder: ${OBSIDIAN_SUBFOLDER}
+
+sync:
+  # 生成されるMarkdownファイルの命名パターン
+  # 利用可能な変数: {title}, {id}, {date}
+  file_naming: "{title}"
+  
+  # NotionページプロパティをYAMLフロントマターとして含めるかどうか
+  include_properties: true
+  
+  # 同じ名前の既存ファイルを上書きするかどうか
+  overwrite_existing: true
+  
+  # 各バッチで処理するページ数
+  batch_size: 10
+  
+  # Notionの制限を処理するための変換設定
+  conversion:
+    # データベースブロックの処理方法: "table", "description", "skip"
+    database_mode: "table"
+    
+    # カラムレイアウトの処理方法: "merge", "separator", "warning_only"
+    column_layout: "separator"
+    
+    # サポートされていないブロックの処理方法: "skip", "placeholder", "warning"
+    unsupported_blocks: "placeholder"
+    
+    # 変換品質レベル: "strict", "standard", "lenient"
+    quality_level: "standard"
+
+# ログ設定
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "sync.log"  # オプション: ファイルにログ出力
